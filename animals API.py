@@ -2,6 +2,7 @@
 API_KEY = "NGvVjduynuMZhmbQ07E7yQhMLvLZFRXtOB3E3uEp"
 
 import requests
+import os
 
 BASE_URL = "https://api.api-ninjas.com/v1/"
 
@@ -11,10 +12,10 @@ def get_animals_data(animal):
     headers = {"X-Api-Key": API_KEY}
     print("Making the following request", request_URL)
     animals = requests.get(request_URL, headers)
-    print("Result of the request", animals)
+    print("Result of the request: ", end="")
+    if "200" in animals.text:
+        print("GET request successful!")
     animals = animals.json()
-    for animal in animals:
-        print(animal)
     return animals
 
 def load_animals_data(file_path):
@@ -28,47 +29,51 @@ def load_html_file(file_path):
 def write_to_new_html_file(content):
     with open("animals.html", "w") as f:
         f.write(content)
+        dir_path=os.path.dirname(os.path.realpath(__file__))
+        print(f'File stored in: {dir_path}\\{f.name}')
 
-def serialize_animal(fox):
+
+def serialize_animal(animal):
     animal_repository_str=''
     animal_repository_str += f'<li class="cards__item">\n'
     animal_repository_str += f'<div class="card__title">\n'
-    if "name" in fox:
-        animal_repository_str += f'{fox['name']}</div>\n'
+    if "name" in animal:
+        animal_repository_str += f'{animal['name']}</div>\n'
         animal_repository_str += f'<div class="card__text">\n'
         animal_repository_str += f'<ul>\n'
-        if "taxonomy" in fox:
-            if "scientific_name" in fox["taxonomy"]:
-                animal_repository_str += f"<li><strong>Scientific name:</strong> {fox["taxonomy"]["scientific_name"]}</li>\n"
-            if "characteristics" in fox:
-                if "diet" in fox["characteristics"]:
-                    animal_repository_str += f"<li><strong>Diet:</strong> {fox["characteristics"]["diet"]}</li>\n"
-            if "locations" in fox:
-                animal_repository_str += f"<li><strong>Location:</strong> {fox["locations"][0]}</li>\n"
-            if "characteristics" in fox:
-                if "type" in fox["characteristics"]:
-                    animal_repository_str += f"<li><strong>Type:</strong> {fox["characteristics"]["type"]}</li>\n"
+        if "taxonomy" in animal:
+            if "scientific_name" in animal["taxonomy"]:
+                animal_repository_str += f"<li><strong>Scientific name:</strong> {animal["taxonomy"]["scientific_name"]}</li>\n"
+            if "characteristics" in animal:
+                if "diet" in animal["characteristics"]:
+                    animal_repository_str += f"<li><strong>Diet:</strong> {animal["characteristics"]["diet"]}</li>\n"
+            if "locations" in animal:
+                animal_repository_str += f"<li><strong>Location:</strong> {animal["locations"][0]}</li>\n"
+            if "characteristics" in animal:
+                if "type" in animal["characteristics"]:
+                    animal_repository_str += f"<li><strong>Type:</strong> {animal["characteristics"]["type"]}</li>\n"
         #animal_repository_str+='</p>\n'
         animal_repository_str+='</ul>\n'
     else:
-        animal_repository_str="ERROR: fox without a name"
+        animal_repository_str="ERROR: animal without a name"
     return animal_repository_str
 
 def main():
-    animals_data=get_animals_data("fox")
+    user_input=input("Animal: ")
+    animals_data=get_animals_data(user_input)
     html_data = load_html_file("animals_template.html")
     __replace__ = "__REPLACE_ANIMALS_INFO__"
 
-    fox_repository_string = ""
+    animal_repository_string = ""
 
-    # for each type of fox in the input json file, create a repository string
-    for fox in animals_data:
-        fox_repository_string += serialize_animal(fox)
+    # for each type of animal in the input json file, create a repository string
+    for animal in animals_data:
+        animal_repository_string += serialize_animal(animal)
 
     # The replacement below is necessary to avoid a mojibake
-    fox_repository_string = fox_repository_string.replace("â€™", "\'")
+    animal_repository_string = animal_repository_string.replace("â€™", "\'")
     # Replace the string to replace in the html with the animal repository
-    html_data = html_data.replace(__replace__, fox_repository_string)
+    html_data = html_data.replace(__replace__, animal_repository_string)
 
     write_to_new_html_file(html_data)
 
