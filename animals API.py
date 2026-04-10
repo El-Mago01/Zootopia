@@ -32,6 +32,15 @@ def write_to_new_html_file(content):
         dir_path=os.path.dirname(os.path.realpath(__file__))
         print(f'File stored in: {dir_path}\\{f.name}')
 
+def html_if_animal_not_in_DB(user_input):
+    animal_repository_str = ''
+    animal_repository_str += f'<li class="cards__item">\n'
+    animal_repository_str += f'<div class="card__title">\n'
+    animal_repository_str += f'<h2>\n'
+    animal_repository_str += f'The animal {user_input} does not exist'
+    animal_repository_str += f'</div></li>\n'
+    animal_repository_str += f'</h2>\n'
+    return animal_repository_str
 
 def serialize_animal(animal):
     animal_repository_str=''
@@ -52,7 +61,7 @@ def serialize_animal(animal):
             if "characteristics" in animal:
                 if "type" in animal["characteristics"]:
                     animal_repository_str += f"<li><strong>Type:</strong> {animal["characteristics"]["type"]}</li>\n"
-        #animal_repository_str+='</p>\n'
+        animal_repository_str+='</li>\n'
         animal_repository_str+='</ul>\n'
     else:
         animal_repository_str="ERROR: animal without a name"
@@ -61,14 +70,24 @@ def serialize_animal(animal):
 def main():
     user_input=input("Animal: ")
     animals_data=get_animals_data(user_input)
+
     html_data = load_html_file("animals_template.html")
     __replace__ = "__REPLACE_ANIMALS_INFO__"
-
     animal_repository_string = ""
+    print("This is the length", len(animals_data))
 
-    # for each type of animal in the input json file, create a repository string
-    for animal in animals_data:
-        animal_repository_string += serialize_animal(animal)
+    if len(animals_data) > 0:
+        # Animal is found
+        # for each type of animal in the input json file, create a repository string
+        print("Animal is found in database, please check the outputfile")
+
+        for animal in animals_data:
+            animal_repository_string += serialize_animal(animal)
+    else:
+        # Animal is not found
+        print("Animal not found in database, please try again")
+        animal_repository_string += html_if_animal_not_in_DB(user_input)
+        print(animal_repository_string)
 
     # The replacement below is necessary to avoid a mojibake
     animal_repository_string = animal_repository_string.replace("â€™", "\'")
