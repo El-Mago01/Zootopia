@@ -1,5 +1,6 @@
 import os
 import data_fetcher
+from pathlib import Path
 
 def load_html_file(file_path):
     with open(file_path, "r") as handle:
@@ -8,8 +9,7 @@ def load_html_file(file_path):
 def write_to_new_html_file(content):
     with open("animals.html", "w") as f:
         f.write(content)
-        dir_path=os.path.dirname(os.path.realpath(__file__))
-        print(f'File stored in: {dir_path}/{f.name}')
+        print(f'File stored in:{Path(__file__).parent.joinpath(f.name)}')
 
 def html_if_animal_not_in_DB(user_input):
     animal_repository_str = ''
@@ -36,7 +36,8 @@ def serialize_animal(animal):
                 if "diet" in animal["characteristics"]:
                     animal_repository_str += f"<li><strong>Diet:</strong> {animal["characteristics"]["diet"]}</li>\n"
             if "locations" in animal:
-                animal_repository_str += f"<li><strong>Location:</strong> {animal["locations"][0]}</li>\n"
+                if len(animal["locations"]) > 0:
+                    animal_repository_str += f"<li><strong>Location:</strong> {animal["locations"][0]}</li>\n"
             if "characteristics" in animal:
                 if "type" in animal["characteristics"]:
                     animal_repository_str += f"<li><strong>Type:</strong> {animal["characteristics"]["type"]}</li>\n"

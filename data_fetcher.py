@@ -14,9 +14,12 @@ def fetches_data_via_GET(animal : str):
     request_URL = f"{BASE_URL}animals?name={animal}"
     headers = {"X-Api-Key": API_KEY}
     print("Making the following request", request_URL)
-    animals = requests.get(request_URL, headers)
+    try:
+        animals = requests.get(request_URL, headers=headers, timeout=5)
+    except Exception as e:
+        print("Error: no timely answer received from API")
     print("Result of the request: ", end="")
-    if "200" in animals.text:
+    if "200" in animals:
         print("GET request successful!")
     animals = animals.json()
     return animals
